@@ -19,6 +19,32 @@ angular.module('selectize', []).value('selectizeConfig', {}).directive("selectiz
         return (val === undefined || val === null || !val.length); //override to support checking empty arrays
       }
 
+      function toSelectize(modelValue) {
+        if (typeof modelValue === 'undefined') {
+            return modelValue;
+        }
+        if (config.maxItems === 1 && typeof modelValue.length === 'undefined') {
+            modelValue = [modelValue];
+        }
+        if (config.toSelectize) {
+            modelValue = config.toSelectize(modelValue);
+        }
+        return modelValue;
+      }
+
+      function toModelValue(items) {
+          if (!items) {
+            return items;
+          }
+          if (config.toModelValue) {
+            items = config.toModelValue(items);
+          }
+          if (config.maxItems === 1 && typeof items.length !== 'undefined') {
+            items = items.length > 0 ? items[0] : undefined;
+          }
+          return items;
+      }
+
       function createItem(input) {
         var data = {};
         data[config.labelField] = input;
@@ -56,14 +82,14 @@ angular.module('selectize', []).value('selectizeConfig', {}).directive("selectiz
 
         if( !angular.equals(selectize.items, scope.ngModel) ){
           selectize.addOption(generateOptions(scope.ngModel))
-          selectize.setValue(scope.ngModel)
+          selectize.setValue(toSelectize(scope.ngModel));
         }
       }
       
       config.onChange = function(){
         if( !angular.equals(selectize.items, scope.ngModel) )
           scope.$evalAsync(function(){
-            modelCtrl.$setViewValue( angular.copy(selectize.items) );
+            modelCtrl.$setViewValue( toModelValue(angular.copy(selectize.items)) );
           });
       }
 
@@ -78,8 +104,8 @@ angular.module('selectize', []).value('selectizeConfig', {}).directive("selectiz
 
       config.onInitialize = function(){
         selectize = element[0].selectize;
-        selectize.addOption(scope.options)
-        selectize.setValue(scope.ngModel)
+        selectize.addOption(scope.options);
+        selectize.setValue(toSelectize(scope.ngModel));
 
         scope.$watchCollection('options', selectize.addOption.bind(selectize));
         scope.$watch('ngModel', updateSelectize);

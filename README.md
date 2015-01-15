@@ -14,8 +14,7 @@ This is an Angular.js directive for Brian Reavis's [selectize jQuery plugin](htt
 * Angular Models & Bindings
 * Skinnable
 * Keyboard support
-
-
+* (New)Data transformation hook between ngModel and Selectize items
 
 
 
@@ -95,3 +94,19 @@ MyApp.value('selectizeConfig', {
   delimiter: '|'
 });
 ```
+
+####Conversion Hook (new in 1.2.0)
+Define these two functions in config to transform data between ngModel and selectize items. This is particularly useful when your ngModel is something other than a string, like a number.
+
+```javascript
+config.toSelectize = function (ModelValue) {
+    // do things with ModelValue and return an item array
+}
+
+config.toModelValue = function (items) {
+    // do things with the item array and return a ModelValue
+}
+```
+
+####maxItems === 1 (new in 1.2.0)
+To make things easier, when maxItems === 1, ngModel will receive the value directly instead of a single element array. Vice versa.
